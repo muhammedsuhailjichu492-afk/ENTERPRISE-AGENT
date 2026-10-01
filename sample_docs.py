@@ -1,8 +1,4 @@
-"""
-Sample organizational knowledge base: policies, SOPs, and playbooks that the
-RAG Agent retrieves from to ground the Decision Agent's recommendations in
-real company procedure rather than generic advice.
-"""
+
 
 DOCUMENTS = [
     {
