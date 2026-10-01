@@ -1,9 +1,4 @@
-"""
-Decision Agent — the reasoning core. Synthesizes the Data Agent's summary,
-SQL Agent's query results, ML Agent's anomaly/trend findings, and RAG
-Agent's policy context into a root-cause analysis and a ranked list of
-recommended actions with an action_type the Action Agent can execute.
-"""
+
 import json
 from app.llm_client import complete_json
 
