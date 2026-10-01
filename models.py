@@ -1,4 +1,4 @@
-"""Pydantic schemas shared across the API layer and agents."""
+
 from typing import Any, Optional
 from pydantic import BaseModel, Field
 
