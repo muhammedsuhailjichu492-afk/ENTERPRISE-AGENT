@@ -1,8 +1,4 @@
-"""
-Single point of contact with the LLM (Claude) so every agent calls the
-model the same way and degrades gracefully when no API key is configured
-(useful for local dev, tests, and offline demos).
-"""
+
 import json
 import re
 from typing import Optional
