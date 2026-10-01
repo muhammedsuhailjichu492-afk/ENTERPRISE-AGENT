@@ -1,9 +1,4 @@
-"""
-Data Agent — first stop in the pipeline. Pulls the relevant slice of
-enterprise data for the requested domain and produces both a structured
-summary (for the ML Agent) and a compact text digest (for the Decision Agent
-prompt).
-"""
+
 import pandas as pd
 from app.database import get_conn, dict_rows
 
