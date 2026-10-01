@@ -1,10 +1,4 @@
-"""
-Risk Engine — rule-based (deliberately not LLM-based, for auditability)
-scoring that decides whether a workflow's recommendations can auto-execute
-or must stop for human approval. Combines ML anomaly severity, domain
-criticality, and keyword-based impact signals from the Decision Agent's
-own recommendation text.
-"""
+
 from app.config import settings
 
 DOMAIN_CRITICALITY = {
