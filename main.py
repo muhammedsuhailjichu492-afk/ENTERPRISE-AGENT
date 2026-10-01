@@ -1,10 +1,4 @@
-"""
-FastAPI entrypoint for the Autonomous Enterprise Intelligence & Operations
-Agent platform.
 
-Run with:
-    uvicorn app.main:app --reload
-"""
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
