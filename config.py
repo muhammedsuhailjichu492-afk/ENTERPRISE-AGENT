@@ -1,9 +1,4 @@
-"""
-Centralized configuration for the Autonomous Enterprise Intelligence & Operations Agent.
 
-All environment-driven settings live here so the rest of the codebase never
-touches os.environ directly.
-"""
 import os
 from pathlib import Path
 from dotenv import load_dotenv
