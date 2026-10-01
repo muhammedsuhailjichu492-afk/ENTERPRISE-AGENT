@@ -1,11 +1,4 @@
-"""
-SQLite persistence layer.
 
-Holds the "enterprise" business data (production, inventory, sales, HR,
-finance, procurement, quality) that the Data Agent and SQL Agent read from,
-plus the operational tables the platform uses to run itself
-(workflows, approvals, actions).
-"""
 import sqlite3
 import json
 import random
