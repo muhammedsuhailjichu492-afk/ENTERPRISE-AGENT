@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Enterprise Intelligence &amp; Operations Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14181B;
+    --paper:#F4F5F1;
+    --panel:#FFFFFF;
+    --line:#DEE1DB;
+    --muted:#5B625D;
+    --amber:#E8A33D;
+    --amber-deep:#B9791E;
+    --risk-low:#3F7D58;
+    --risk-medium:#C98A2E;
+    --risk-high:#C05A3D;
+    --risk-critical:#B24C3F;
+    --focus:#1D4E4B;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:14.5px; line-height:1.5;}
+  h1,h2,h3{font-family:'Source Serif 4',Georgia,serif; font-weight:600; margin:0;}
+  code, .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;}
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--focus); outline-offset:2px;
+  }
+
+  .shell{display:grid; grid-template-columns:240px 1fr; min-height:100vh;}
+  .sidebar{background:var(--ink); color:#E9EAE6; padding:28px 20px; position:sticky; top:0; height:100vh;}
+  .brand{display:flex; align-items:center; gap:10px; margin-bottom:34px;}
+  .brand-dot{width:10px; height:10px; border-radius:50%; background:var(--amber); box-shadow:0 0 0 3px rgba(232,163,61,0.2);}
+  .brand-text{font-family:'Source Serif 4',serif; font-size:16px; line-height:1.25;}
+  .brand-text small{display:block; color:#9AA39B; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.02em; margin-top:2px;}
+
+  .nav-group{margin-bottom:26px;}
+  .nav-label{font-size:11px; color:#8B948C; margin-bottom:8px; font-family:'IBM Plex Mono',monospace;}
+  .nav-item{display:flex; align-items:center; justify-content:space-between; padding:7px 8px; border-radius:4px;
+    color:#D3D6CF; cursor:pointer; font-size:13.5px;}
+  .nav-item:hover{background:rgba(255,255,255,0.06);}
+  .nav-item.active{background:rgba(232,163,61,0.14); color:#F3D9A8;}
+  .badge{background:var(--amber); color:#241800; font-size:11px; font-weight:600; padding:1px 7px; border-radius:10px;}
+
+  main{padding:34px 44px 80px; max-width:1080px;}
+  .hero{margin-bottom:28px;}
+  .eyebrow{color:var(--muted); font-size:12.5px; margin-bottom:6px;}
+  .hero h1{font-size:27px; letter-spacing:-0.01em;}
+  .hero p{color:var(--muted); max-width:60ch; margin-top:8px;}
+
+  .composer{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:20px 22px; margin-bottom:30px;}
+  .composer-row{display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:12px; color:var(--muted);}
+  select, textarea, input[type=text]{
+    font-family:inherit; font-size:14px; padding:9px 11px; border:1px solid var(--line); border-radius:4px;
+    background:#FCFCFB; color:var(--ink);
+  }
+  textarea{width:100%; min-height:52px; resize:vertical;}
+  .field.grow{flex:1; min-width:280px;}
+  .run-btn{background:var(--ink); color:#F4EFE3; border:none; padding:11px 20px; border-radius:4px;
+    font-family:'IBM Plex Sans',sans-serif; font-weight:600; font-size:13.5px; cursor:pointer; white-space:nowrap;}
+  .run-btn:hover{background:#232B2D;}
+  .run-btn:disabled{opacity:0.5; cursor:progress;}
+  .examples{margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;}
+  .example-chip{border:1px solid var(--line); background:#FCFCFB; padding:5px 10px; border-radius:14px;
+    font-size:12px; color:var(--muted); cursor:pointer;}
+  .example-chip:hover{border-color:var(--amber-deep); color:var(--ink);}
+
+  .pipeline{position:relative; padding-left:26px;}
+  .pipeline::before{content:""; position:absolute; left:8px; top:6px; bottom:6px; width:1px; background:var(--line);}
+  .step{position:relative; background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--ink);
+    border-radius:4px; padding:16px 18px; margin-bottom:14px;}
+  .step::before{content:""; position:absolute; left:-26px; top:20px; width:9px; height:9px; border-radius:50%;
+    background:var(--paper); border:2px solid var(--ink);}
+  .step-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  .step-name{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); text-transform:lowercase;}
+  .step-title{font-size:15.5px; font-weight:600; margin-top:2px;}
+  .step.data{border-left-color:#4E6E58;}
+  .step.sql{border-left-color:#3E6E8E;}
+  .step.ml{border-left-color:#7A5DA6;}
+  .step.rag{border-left-color:#3E7C7A;}
+  .step.decision{border-left-color:var(--amber-deep);}
+  .step.risk{border-left-color:var(--risk-high);}
+  .step.approval{border-left-color:var(--risk-medium);}
+  .step.action{border-left-color:var(--risk-low);}
+
+  .kv{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px 18px; margin-top:10px;}
+  .kv div span{display:block;}
+  .kv .k{font-size:11px; color:var(--muted); font-family:'IBM Plex Mono',monospace;}
+  .kv .v{font-size:14px; margin-top:2px;}
+
+  .rec-card{border:1px solid var(--line); border-radius:4px; padding:12px 14px; margin-top:10px; background:#FBFBFA;}
+  .rec-head{display:flex; justify-content:space-between; gap:10px; align-items:baseline;}
+  .rec-action{font-weight:600;}
+  .pill{font-size:11px; padding:2px 9px; border-radius:10px; font-family:'IBM Plex Mono',monospace;}
+  .pill.low{background:#E4EFE7; color:var(--risk-low);}
+  .pill.medium{background:#F7EBD8; color:var(--risk-medium);}
+  .pill.high{background:#F5E1DA; color:var(--risk-high);}
+  .rec-meta{font-size:12.5px; color:var(--muted); margin-top:5px;}
+
+  .risk-score{display:flex; align-items:center; gap:14px; margin-top:8px;}
+  .risk-dial{font-family:'IBM Plex Mono',monospace; font-size:26px; font-weight:600;}
+  .risk-level{padding:3px 11px; border-radius:12px; font-size:12px; font-family:'IBM Plex Mono',monospace; color:#fff;}
+  .factors{margin-top:8px; padding-left:18px; color:var(--muted); font-size:13px;}
+
+  .approval-banner{border:1px solid var(--amber-deep); background:#FBF3E3; border-radius:4px; padding:14px 16px; margin-top:8px;}
+  .approval-actions{display:flex; gap:10px; margin-top:12px;}
+  .btn-approve{background:var(--risk-low); color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-weight:600;}
+  .btn-reject{background:transparent; color:var(--risk-critical); border:1px solid var(--risk-critical); padding:8px 16px; border-radius:4px; cursor:pointer; font-weight:600;}
+
+  .empty{color:var(--muted); font-size:13.5px; padding:20px 0;}
+  .list-row{display:flex; justify-content:space-between; gap:14px; padding:12px 0; border-bottom:1px solid var(--line); align-items:baseline;}
+  .list-row:last-child{border-bottom:none;}
+  .list-row .q{font-size:14px;}
+  .list-row .meta{font-size:12px; color:var(--muted); font-family:'IBM Plex Mono',monospace;}
+  .status-tag{font-size:11px; padding:2px 9px; border-radius:10px; font-family:'IBM Plex Mono',monospace;}
+  .status-completed{background:#E4EFE7; color:var(--risk-low);}
+  .status-awaiting_approval{background:#F7EBD8; color:var(--risk-medium);}
+  .status-rejected{background:#F5E1DA; color:var(--risk-critical);}
+
+  .loader{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:13.5px; padding:16px 0;}
+  .spinner{width:14px; height:14px; border-radius:50%; border:2px solid var(--line); border-top-color:var(--amber-deep); animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  pre.sql{background:#161B1D; color:#E9EAE6; padding:10px 12px; border-radius:4px; font-size:12.5px; overflow-x:auto; margin-top:8px;}
+
+  section{display:none;}
+  section.active{display:block;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <div class="brand-text">Ops Intelligence<small>SUPERVISOR &middot; AGENTIC PIPELINE</small></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">CONSOLE</div>
+      <div class="nav-item active" data-view="analyze">Run analysis</div>
+      <div class="nav-item" data-view="approvals">Pending approvals <span class="badge" id="approval-count">0</span></div>
+      <div class="nav-item" data-view="history">Workflow history</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">DOMAINS</div>
+      <div id="domain-list"></div>
+    </div>
+  </aside>
+
+  <main>
+    <section id="view-analyze" class="active">
+      <div class="hero">
+        <div class="eyebrow">Autonomous Enterprise Intelligence &amp; Operations Agent</div>
+        <h1>Ask a question about the business</h1>
+        <p>The Supervisor routes your question through Data → SQL → ML → RAG → Decision → Risk agents,
+           then either executes automatically or opens a human approval before anything is actioned.</p>
+      </div>
+
+      <div class="composer">
+        <div class="composer-row">
+          <div class="field">
+            <label for="domain-select">Domain</label>
+            <select id="domain-select"></select>
+          </div>
+          <div class="field grow">
+            <label for="query-input">Question</label>
+            <textarea id="query-input" placeholder="e.g. Why is Line-A's defect rate rising and what should we do?"></textarea>
+          </div>
+          <button class="run-btn" id="run-btn">Run analysis</button>
+        </div>
+        <div class="examples" id="example-chips"></div>
+      </div>
+
+      <div id="pipeline-output"></div>
+    </section>
+
+    <section id="view-approvals">
+      <div class="hero">
+        <div class="eyebrow">Human Approval Queue</div>
+        <h1>Pending approvals</h1>
+        <p>Recommendations that crossed the risk threshold and require sign-off before the Action Agent runs.</p>
+      </div>
+      <div id="approvals-list"></div>
+    </section>
+
+    <section id="view-history">
+      <div class="hero">
+        <div class="eyebrow">Audit Trail</div>
+        <h1>Workflow history</h1>
+        <p>Every analysis run, with its final status. Click one to reopen the full trace.</p>
+      </div>
+      <div id="history-list"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const DOMAINS = ["production","inventory","quality","operations","procurement","hr","sales","finance","projects","reporting"];
+const EXAMPLES = {
+  production: "Why is Line-A's defect rate rising and what should we do about it?",
+  inventory: "Which SKUs are at risk of stocking out and what reorders do we need?",
+  quality: "Is the recent complaint spike linked to a specific production line?",
+  procurement: "Is any supplier's on-time delivery performance degrading?",
+  finance: "Which department is most over budget and why?",
+  hr: "Which department has the highest attrition risk right now?",
+  sales: "Which region is underperforming against its recent average?",
+  projects: "Which projects are at risk of missing their due date?",
+  operations: "Where is downtime concentrated and what's driving it?",
+  reporting: "Summarize this month's biggest operational risks across the business."
+};
+
+let currentDomain = "production";
+
+function el(sel){ return document.querySelector(sel); }
+function els(sel){ return Array.from(document.querySelectorAll(sel)); }
+
+async function responseData(res){
+  const text = await res.text();
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch {
+    return {detail: text || res.statusText};
+  }
+}
+
+function initSidebarDomains(){
+  const list = el("#domain-list");
+  const select = el("#domain-select");
+  DOMAINS.forEach(d => {
+    const item = document.createElement("div");
+    item.className = "nav-item" + (d === currentDomain ? " active" : "");
+    item.textContent = d[0].toUpperCase() + d.slice(1);
+    item.dataset.domain = d;
+    item.onclick = () => { setDomain(d); showView("analyze"); };
+    list.appendChild(item);
+
+    const opt = document.createElement("option");
+    opt.value = d; opt.textContent = d[0].toUpperCase() + d.slice(1);
+    select.appendChild(opt);
+  });
+  select.value = currentDomain;
+  select.onchange = () => setDomain(select.value);
+}
+
+function setDomain(d){
+  currentDomain = d;
+  el("#domain-select").value = d;
+  els("#domain-list .nav-item").forEach(i => i.classList.toggle("active", i.dataset.domain === d));
+  renderExampleChips();
+}
+
+function renderExampleChips(){
+  const wrap = el("#example-chips");
+  wrap.innerHTML = "";
+  const chip = document.createElement("span");
+  chip.className = "example-chip";
+  chip.textContent = "Try: " + EXAMPLES[currentDomain];
+  chip.onclick = () => { el("#query-input").value = EXAMPLES[currentDomain]; };
+  wrap.appendChild(chip);
+}
+
+function showView(view){
+  ["analyze","approvals","history"].forEach(v => el("#view-"+v).classList.toggle("active", v === view));
+  els(".sidebar .nav-item").forEach(i => {
+    if (i.dataset.view) i.classList.toggle("active", i.dataset.view === view);
+  });
+  if (view === "approvals") loadApprovals();
+  if (view === "history") loadHistory();
+}
+
+els(".sidebar .nav-item[data-view]").forEach(i => i.onclick = () => showView(i.dataset.view));
+
+// ---------- Run analysis ----------
+el("#run-btn").onclick = runAnalysis;
+
+async function runAnalysis(){
+  const query = el("#query-input").value.trim();
+  if (!query){ el("#query-input").focus(); return; }
+  const btn = el("#run-btn");
+  btn.disabled = true; btn.textContent = "Running…";
+  const output = el("#pipeline-output");
+  output.innerHTML = '<div class="loader"><div class="spinner"></div>Supervisor is orchestrating the agent pipeline…</div>';
+
+  try {
+    const res = await fetch("/api/analyze", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({query, domain: currentDomain})
+    });
+    if (!res.ok){
+      const err = await responseData(res);
+      output.innerHTML = `<div class="empty">Error: ${err.detail || res.statusText}</div>`;
+      return;
+    }
+    const data = await responseData(res);
+    renderPipeline(data);
+    refreshApprovalCount();
+  } catch (e){
+    output.innerHTML = `<div class="empty">Request failed: ${e}</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = "Run analysis";
+  }
+}
+
+function stepBlock(cls, name, title, bodyHtml){
+  return `<div class="step ${cls}">
+    <div class="step-head">
+      <div><div class="step-name">${name}</div><div class="step-title">${title}</div></div>
+    </div>
+    ${bodyHtml}
+  </div>`;
+}
+
+function kv(pairs){
+  return `<div class="kv">${pairs.map(([k,v]) => `<div><span class="k">${k}</span><span class="v">${v}</span></div>`).join("")}</div>`;
+}
+
+function renderPipeline(data){
+  const output = el("#pipeline-output");
+  const trace = data.trace.steps;
+  let html = '<div class="pipeline">';
+
+  const dataStep = trace.find(s => s.step === "data_agent");
+  if (dataStep){
+    const s = dataStep.output.summary || {};
+    html += stepBlock("data", "data_agent", `Gathered ${dataStep.output.record_count} records from '${dataStep.output.table}'`,
+      kv([
+        ["metric", s.metric || "—"],
+        ["mean", s.mean ?? "—"],
+        ["recent avg (last 5)", s.recent_avg_last5 ?? "—"],
+        ["baseline avg", s.baseline_avg_first_half ?? "—"],
+      ]));
+  }
+
+  const sqlStep = trace.find(s => s.step === "sql_agent");
+  if (sqlStep){
+    const o = sqlStep.output;
+    html += stepBlock("sql", "sql_agent", o.executed ? `Query executed — ${o.rows.length} rows returned` : "Query not executed",
+      `<pre class="sql">${escapeHtml(o.sql || "")}</pre>` + (o.reason ? `<div class="rec-meta">${escapeHtml(o.reason)}</div>` : ""));
+  }
+
+  const mlStep = trace.find(s => s.step === "ml_agent");
+  if (mlStep){
+    const o = mlStep.output;
+    const trend = o.trend;
+    html += stepBlock("ml", "ml_agent", `Anomaly rate ${(o.anomaly_rate*100 || 0).toFixed(1)}% · ${o.anomaly_count || 0} anomalies flagged`,
+      kv([
+        ["trend direction", trend ? trend.direction : "—"],
+        ["forecast (next period)", trend ? trend.forecast_next_period : "—"],
+        ["window change %", trend ? trend.pct_change_first_vs_second_half + "%" : "—"],
+      ]));
+  }
+
+  const ragStep = trace.find(s => s.step === "rag_agent");
+  if (ragStep){
+    const hits = ragStep.output.results || [];
+    html += stepBlock("rag", "rag_agent", `Retrieved ${hits.length} relevant policy document(s)`,
+      hits.map(h => `<div class="rec-meta"><strong>${escapeHtml(h.title)}</strong> — ${escapeHtml(h.text.slice(0,140))}…</div>`).join(""));
+  }
+
+  const decision = data.decision;
+  if (decision){
+    html += stepBlock("decision", "decision_agent", "Root cause &amp; recommendations",
+      `<div class="rec-meta">${escapeHtml(decision.root_cause || "")}</div>
+       <p style="margin:10px 0 0;">${escapeHtml(decision.summary || "")}</p>
+       ${(decision.recommendations||[]).map(r => `
+         <div class="rec-card">
+           <div class="rec-head"><span class="rec-action">${escapeHtml(r.action)}</span><span class="pill ${r.priority}">${r.priority}</span></div>
+           <div class="rec-meta">${escapeHtml(r.rationale)}</div>
+           <div class="rec-meta">Expected impact: ${escapeHtml(r.expected_impact)} · action_type: <code>${r.action_type}</code></div>
+         </div>`).join("")}`);
+  }
+
+  const risk = data.risk;
+  if (risk){
+    html += stepBlock("risk", "risk_engine", "Risk assessment",
+      `<div class="risk-score">
+         <div class="risk-dial">${risk.score}/100</div>
+         <div class="risk-level" style="background:${riskColor(risk.level)}">${risk.level}</div>
+       </div>
+       <ul class="factors">${risk.factors.map(f => `<li>${escapeHtml(f)}</li>`).join("")}</ul>`);
+  }
+
+  if (data.status === "awaiting_approval" && data.approval){
+    html += stepBlock("approval", "human_approval", "Awaiting human approval",
+      `<div class="approval-banner">
+         This workflow's risk score (${risk.score}) met or exceeded the approval threshold. Review the
+         recommendation${(decision.recommendations||[]).length>1?"s":""} above and decide.
+         <div class="approval-actions">
+           <button class="btn-approve" onclick="decideApproval('${data.approval.id}', true)">Approve &amp; execute</button>
+           <button class="btn-reject" onclick="decideApproval('${data.approval.id}', false)">Reject</button>
+         </div>
+       </div>`);
+  } else if (data.executed_actions && data.executed_actions.length){
+    html += stepBlock("action", "action_agent", `${data.executed_actions.length} action(s) auto-executed (below approval threshold)`,
+      data.executed_actions.map(a => `<div class="rec-meta"><code>${a.action_type}</code> — ${escapeHtml(a.result.detail || "")}</div>`).join(""));
+  }
+
+  html += '</div>';
+  output.innerHTML = html;
+}
+
+function riskColor(level){
+  return {low:"var(--risk-low)", medium:"var(--risk-medium)", high:"var(--risk-high)", critical:"var(--risk-critical)"}[level] || "#666";
+}
+
+function escapeHtml(str){
+  if (str === null || str === undefined) return "";
+  return String(str).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+// ---------- Approvals ----------
+async function decideApproval(id, approved){
+  const res = await fetch(`/api/approvals/${id}/decide`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({approved, decided_by: "console_user"})
+  });
+  const data = await responseData(res);
+  if (res.ok){
+    alert(`Approval ${approved ? "approved" : "rejected"}.` + (data.executed_actions && data.executed_actions.length ? ` ${data.executed_actions.length} action(s) executed.` : ""));
+    refreshApprovalCount();
+    showView("approvals");
+  } else {
+    alert("Error: " + (data.detail || "unknown error"));
+  }
+}
+
+async function loadApprovals(){
+  const wrap = el("#approvals-list");
+  wrap.innerHTML = '<div class="loader"><div class="spinner"></div>Loading…</div>';
+  const res = await fetch("/api/approvals?status=pending");
+  const data = await responseData(res);
+  if (!data.length){ wrap.innerHTML = '<div class="empty">No pending approvals.</div>'; return; }
+  wrap.innerHTML = data.map(a => `
+    <div class="step approval">
+      <div class="step-head">
+        <div><div class="step-name">${a.domain}</div><div class="step-title">${escapeHtml(a.summary)}</div></div>
+        <div class="risk-level" style="background:${riskColor(a.risk_level)}">${a.risk_level} · ${a.risk_score}</div>
+      </div>
+      <div class="approval-actions">
+        <button class="btn-approve" onclick="decideApproval('${a.id}', true)">Approve &amp; execute</button>
+        <button class="btn-reject" onclick="decideApproval('${a.id}', false)">Reject</button>
+      </div>
+    </div>`).join("");
+}
+
+async function refreshApprovalCount(){
+  const res = await fetch("/api/approvals?status=pending");
+  const data = await responseData(res);
+  el("#approval-count").textContent = data.length;
+}
+
+// ---------- History ----------
+async function loadHistory(){
+  const wrap = el("#history-list");
+  wrap.innerHTML = '<div class="loader"><div class="spinner"></div>Loading…</div>';
+  const res = await fetch("/api/workflows");
+  const data = await responseData(res);
+  if (!data.length){ wrap.innerHTML = '<div class="empty">No workflows yet — run an analysis first.</div>'; return; }
+  wrap.innerHTML = data.map(w => `
+    <div class="list-row">
+      <div><div class="q">${escapeHtml(w.query)}</div><div class="meta">${w.domain} · ${w.id.slice(0,8)}</div></div>
+      <span class="status-tag status-${w.status}">${w.status.replace('_',' ')}</span>
+    </div>`).join("");
+}
+
+initSidebarDomains();
+renderExampleChips();
+refreshApprovalCount();
+</script>
+</body>
+</html>
