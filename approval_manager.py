@@ -1,8 +1,4 @@
-"""
-Approval Manager — the "Human Approval" node in the architecture. Persists
-pending approvals, and once a human decides, hands approved recommendations
-to the Action Agent and updates the parent workflow's status/trace.
-"""
+
 import json
 import uuid
 import datetime as dt
