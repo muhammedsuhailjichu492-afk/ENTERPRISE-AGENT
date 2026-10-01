@@ -1,8 +1,4 @@
-"""
-RAG Agent — retrieves relevant organizational policy/SOP context from the
-vector DB so the Decision Agent grounds its recommendations in actual
-company procedure instead of generic advice.
-"""
+
 from app import vector_store
 
 
