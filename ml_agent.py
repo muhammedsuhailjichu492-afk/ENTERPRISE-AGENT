@@ -1,9 +1,4 @@
-"""
-ML Agent — runs unsupervised anomaly detection (IsolationForest) over the
-domain's numeric records and a lightweight linear trend forecast on the
-primary metric. Feeds structured findings to the Decision Agent and Risk
-Engine.
-"""
+
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
