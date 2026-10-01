@@ -1,9 +1,4 @@
-"""
-SQL Agent — translates the operator's natural-language question into a
-read-only SQL query against the enterprise schema, validates it, executes
-it, and returns the rows. Runs after the Data Agent so it can focus the
-query using the same domain's table.
-"""
+
 import re
 from app.database import get_conn, dict_rows
 from app.llm_client import complete
