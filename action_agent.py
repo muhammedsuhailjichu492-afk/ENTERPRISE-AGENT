@@ -1,10 +1,4 @@
-"""
-Action Agent — the final step. Executes a recommendation once it has either
-been auto-cleared (low risk) or explicitly approved by a human. Each
-action_type maps to a handler; in this reference implementation the handlers
-are simulated (they log a structured result) but are written as the natural
-seam for wiring up real systems (ERP, ticketing, email, Slack, etc).
-"""
+
 import json
 import uuid
 import datetime as dt
